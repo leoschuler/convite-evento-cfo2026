@@ -1,0 +1,266 @@
+@import "tailwindcss";
+
+@theme {
+  --color-void: #050506;
+  --color-ink: #0a0b0d;
+  --color-charcoal: #101114;
+  --color-graphite: #17191d;
+  --color-steel: #24272d;
+  --color-line: #2b2e35;
+
+  --color-bone: #edeae3;
+  --color-ash: #8e9096;
+  --color-dim: #5b5e66;
+  --color-platinum: #d8d2c6;
+  --color-ember: #b9a582;
+
+  /* Marca CFO Insights — extraída do logo 2026. Usada da v3 em diante. */
+  --color-azure: #0a7cff;
+  --color-cyan: #38cfff;
+  --color-deep: #063a7a;
+  --color-night: #04070d;
+  --color-slate: #0b1220;
+  --color-frost: #e9eef5;
+  --color-steel-blue: #7e8b9e;
+  --color-edge: #1e2a3a;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-instrument), "Times New Roman", ui-serif, serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", "Consolas", monospace;
+
+  --ease-cinema: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  background: var(--color-void);
+}
+
+body {
+  background: var(--color-void);
+  color: var(--color-bone);
+  font-family: var(--font-sans);
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+body[data-locked="true"] {
+  overflow: hidden;
+  height: 100dvh;
+}
+
+::selection {
+  background: var(--color-bone);
+  color: var(--color-void);
+}
+
+/* Scrollbar discreta — a barra padrão do Windows destrói a atmosfera. */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #26292f;
+  border-radius: 99px;
+}
+
+/* ---------- tipografia utilitária ---------- */
+
+@utility label {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  line-height: 1;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-dim);
+}
+
+@utility label-bright {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  line-height: 1;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-ash);
+}
+
+@utility display {
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 0.94;
+  text-wrap: balance;
+}
+
+@utility serif-accent {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- acabamento ---------- */
+
+@utility hairline {
+  background: linear-gradient(90deg, transparent, var(--color-line) 12%, var(--color-line) 88%, transparent);
+  height: 1px;
+}
+
+@utility metal-text {
+  background: linear-gradient(
+    100deg,
+    #6a6c71 0%,
+    #cfcabf 20%,
+    #ffffff 34%,
+    #8a8c92 50%,
+    #e8e3d9 70%,
+    #74767c 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility edge {
+  border: 1px solid var(--color-line);
+}
+
+/* Máscara de fade nas bordas (marquee, listas) */
+/* Gradiente do logo CFO Insights aplicado a texto. */
+@utility brand-text {
+  background: linear-gradient(96deg, #063a7a 0%, #0a7cff 38%, #38cfff 72%, #9fe6ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Halo azul — o mesmo wash de luz das fotos do evento. */
+@utility bloom {
+  box-shadow:
+    0 0 0 1px rgba(56, 207, 255, 0.14),
+    0 0 60px -12px rgba(10, 124, 255, 0.4);
+}
+
+@utility fade-x {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+/* ---------- reveal base (estado inicial via CSS evita FOUC) ---------- */
+
+[data-reveal] {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/*
+ * A máscara corta o que sobe de baixo. Com line-height < 1 ela também cortava
+ * descendentes (o "g" de "lugar"), então a caixa cresce para baixo e o espaço
+ * é devolvido com margem negativa — layout idêntico, descendente inteiro.
+ */
+.line-mask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.18em;
+  margin-bottom: -0.18em;
+}
+
+.line-mask > span {
+  display: block;
+  will-change: transform;
+}
+
+/* ---------- grão / atmosfera ---------- */
+
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  opacity: 0.05;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+@keyframes drift-a {
+  0%,
+  100% {
+    transform: translate3d(-6%, -4%, 0) scale(1.05);
+  }
+  50% {
+    transform: translate3d(6%, 4%, 0) scale(1.15);
+  }
+}
+
+@keyframes drift-b {
+  0%,
+  100% {
+    transform: translate3d(5%, 6%, 0) scale(1.1);
+  }
+  50% {
+    transform: translate3d(-5%, -6%, 0) scale(1);
+  }
+}
+
+@keyframes sheen {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-sheen {
+  animation: sheen 7s linear infinite;
+}
+
+/* ---------- acessibilidade ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+:focus-visible {
+  outline: 1px solid var(--color-platinum);
+  outline-offset: 3px;
+}
+
+/* Cursor custom só no desktop com ponteiro fino. */
+@media (hover: hover) and (pointer: fine) {
+  body[data-cursor-on="true"],
+  body[data-cursor-on="true"] * {
+    cursor: none !important;
+  }
+}

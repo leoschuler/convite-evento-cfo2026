@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0c0e13"/>
+      <stop offset="55%" stop-color="#080a0e"/>
+      <stop offset="100%" stop-color="#040507"/>
+    </linearGradient>
+    <radialGradient id="bok" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#e8ecf4" stop-opacity="0.9"/>
+      <stop offset="62%" stop-color="#e8ecf4" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#e8ecf4" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vig" cx="50%" cy="45%" r="72%">
+      <stop offset="55%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.72"/>
+    </radialGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6.2"/>
+    </filter>
+    <filter id="softer" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="17.8"/>
+    </filter>
+    
+  <radialGradient id="l1" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#c9ae82" stop-opacity="0.42"/>
+    <stop offset="55%" stop-color="#c9ae82" stop-opacity="0.11760000000000001"/>
+    <stop offset="100%" stop-color="#c9ae82" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="l2" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#8fa2c4" stop-opacity="0.3"/>
+    <stop offset="55%" stop-color="#8fa2c4" stop-opacity="0.084"/>
+    <stop offset="100%" stop-color="#8fa2c4" stop-opacity="0"/>
+  </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#base)"/>
+  
+        <ellipse cx="256" cy="306" rx="544" ry="396" fill="url(#l1)" transform="rotate(0 256 306)"/>
+        <ellipse cx="1408" cy="180" rx="480" ry="306" fill="url(#l2)" transform="rotate(0 1408 180)"/>
+        <rect x="0" y="666" width="1600" height="7.2" fill="#c9ae82" opacity="0.16"/>
+        <rect x="128" y="684" width="1344" height="270" fill="#07080b" opacity="0.9" filter="url(#soft)"/>
+        <g><circle cx="1530" cy="575" r="13" fill="url(#bok)" opacity="0.19"/><circle cx="1304" cy="530" r="21" fill="url(#bok)" opacity="0.51"/><circle cx="1225" cy="207" r="20" fill="url(#bok)" opacity="0.26"/><circle cx="151" cy="577" r="8" fill="url(#bok)" opacity="0.47"/><circle cx="1501" cy="543" r="14" fill="url(#bok)" opacity="0.50"/><circle cx="1593" cy="179" r="14" fill="url(#bok)" opacity="0.17"/><circle cx="398" cy="540" r="12" fill="url(#bok)" opacity="0.13"/><circle cx="850" cy="122" r="9" fill="url(#bok)" opacity="0.39"/><circle cx="414" cy="225" r="16" fill="url(#bok)" opacity="0.19"/><circle cx="1408" cy="206" r="7" fill="url(#bok)" opacity="0.50"/></g>
+        <g fill="#05060a" filter="url(#soft)">
+      <g opacity="0.53">
+        <circle cx="72" cy="617" r="40"/>
+        <path d="M-19 957
+                 q0 -153 91 -153
+                 q91 0 91 153 z"/>
+      </g>
+      <g opacity="0.89">
+        <circle cx="222" cy="621" r="32"/>
+        <path d="M150 891
+                 q0 -122 72 -122
+                 q72 0 72 122 z"/>
+      </g>
+      <g opacity="0.81">
+        <circle cx="442" cy="613" r="37"/>
+        <path d="M358 929
+                 q0 -142 84 -142
+                 q84 0 84 142 z"/>
+      </g>
+      <g opacity="0.53">
+        <circle cx="594" cy="635" r="33"/>
+        <path d="M519 916
+                 q0 -127 75 -127
+                 q75 0 75 127 z"/>
+      </g>
+      <g opacity="0.62">
+        <circle cx="787" cy="623" r="39"/>
+        <path d="M699 952
+                 q0 -149 88 -149
+                 q88 0 88 149 z"/>
+      </g>
+      <g opacity="0.84">
+        <circle cx="983" cy="617" r="40"/>
+        <path d="M892 957
+                 q0 -153 91 -153
+                 q91 0 91 153 z"/>
+      </g>
+      <g opacity="0.52">
+        <circle cx="1169" cy="622" r="37"/>
+        <path d="M1085 936
+                 q0 -142 84 -142
+                 q84 0 84 142 z"/>
+      </g>
+      <g opacity="0.62">
+        <circle cx="1263" cy="645" r="29"/>
+        <path d="M1197 892
+                 q0 -111 66 -111
+                 q66 0 66 111 z"/>
+      </g>
+      <g opacity="0.91">
+        <circle cx="1452" cy="621" r="38"/>
+        <path d="M1367 938
+                 q0 -143 85 -143
+                 q85 0 85 143 z"/>
+      </g></g>
+  <rect width="1600" height="900" fill="url(#vig)"/>
+</svg>

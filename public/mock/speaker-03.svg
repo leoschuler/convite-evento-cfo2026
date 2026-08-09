@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" width="1200" height="1500">
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0c0e13"/>
+      <stop offset="55%" stop-color="#080a0e"/>
+      <stop offset="100%" stop-color="#040507"/>
+    </linearGradient>
+    <radialGradient id="bok" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#e8ecf4" stop-opacity="0.9"/>
+      <stop offset="62%" stop-color="#e8ecf4" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#e8ecf4" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vig" cx="50%" cy="45%" r="72%">
+      <stop offset="55%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.72"/>
+    </radialGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4.6"/>
+    </filter>
+    <filter id="softer" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="13.3"/>
+    </filter>
+    
+  <radialGradient id="l1" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#8fa2c4" stop-opacity="0.36"/>
+    <stop offset="55%" stop-color="#8fa2c4" stop-opacity="0.1008"/>
+    <stop offset="100%" stop-color="#8fa2c4" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="l2" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#e8ecf4" stop-opacity="0.42"/>
+    <stop offset="55%" stop-color="#e8ecf4" stop-opacity="0.11760000000000001"/>
+    <stop offset="100%" stop-color="#e8ecf4" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="l3" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#c9ae82" stop-opacity="0.18"/>
+    <stop offset="55%" stop-color="#c9ae82" stop-opacity="0.0504"/>
+    <stop offset="100%" stop-color="#c9ae82" stop-opacity="0"/>
+  </radialGradient>
+  </defs>
+  <rect width="1200" height="1500" fill="url(#base)"/>
+  
+        <ellipse cx="600" cy="450" rx="660" ry="600" fill="url(#l1)" transform="rotate(0 600 450)"/>
+        <ellipse cx="144" cy="1170" rx="360" ry="450" fill="url(#l3)" transform="rotate(0 144 1170)"/>
+        <g><circle cx="1134" cy="189" r="18" fill="url(#bok)" opacity="0.19"/><circle cx="1137" cy="596" r="8" fill="url(#bok)" opacity="0.28"/><circle cx="1006" cy="932" r="20" fill="url(#bok)" opacity="0.22"/><circle cx="780" cy="422" r="11" fill="url(#bok)" opacity="0.48"/><circle cx="1041" cy="303" r="11" fill="url(#bok)" opacity="0.32"/><circle cx="995" cy="731" r="28" fill="url(#bok)" opacity="0.23"/><circle cx="378" cy="390" r="21" fill="url(#bok)" opacity="0.33"/><circle cx="649" cy="588" r="32" fill="url(#bok)" opacity="0.34"/><circle cx="576" cy="441" r="25" fill="url(#bok)" opacity="0.43"/></g>
+        <g fill="#05060a" filter="url(#soft)">
+          <circle cx="600" cy="630" r="204.00000000000003"/>
+          <path d="M168.00000000000003 1575 q0 -480 432 -480
+                   q432 0 432 480 z"/>
+        </g>
+        <ellipse cx="888" cy="510.00000000000006" rx="264" ry="390" fill="url(#l2)" transform="rotate(0 888 510.00000000000006)"/>
+  <rect width="1200" height="1500" fill="url(#vig)"/>
+</svg>
