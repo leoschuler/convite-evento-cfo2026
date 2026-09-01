@@ -39,7 +39,7 @@ O que dá para fazer lá:
 
 A senha vira um cookie `httpOnly` com hash SHA-256 (a senha nunca trafega depois do login) e a comparação é em tempo constante. Toda rota `/api/admin/*` valida o cookie.
 
-O painel grava em `data/invitations.json`. Em produção use um volume persistente ou troque as funções de [lib/invitations.server.ts](lib/invitations.server.ts) por banco.
+O painel grava em `data/invitations.json` **dentro do bucket R2** (variáveis `R2_*` em `.env`), não no disco local — o JSON versionado no repo é só o seed inicial, usado como fallback até a primeira escrita popular o bucket. Fotos e logos enviados também vão para o bucket, via [lib/storage.server.ts](lib/storage.server.ts). Para trocar por um banco/CRM de verdade, só [lib/invitations.server.ts](lib/invitations.server.ts) muda.
 
 ---
 
@@ -84,7 +84,7 @@ Opções:
 
 **Na mão**: adicione um objeto em [data/invitations.json](data/invitations.json) seguindo o formato dos existentes. O `invite_slug` é o que vira a URL.
 
-Em desenvolvimento o convite passa a existir na hora. Em produção, o JSON é lido no build — publicar o arquivo é o que ativa o link. Quando virar volume, troque `getInvitation` em [lib/invitations.ts](lib/invitations.ts) por consulta ao banco/CRM: nenhum componente conhece a origem do dado.
+Atenção: esse script (`npm run invite`) só escreve no arquivo local — ele não fala com o bucket R2. Serve para gerar o seed inicial ou para uso em desenvolvimento; em produção, cadastre pelo painel `/admin`, que já grava no bucket. Quando trocar por banco/CRM, troque `getInvitation` em [lib/invitations.ts](lib/invitations.ts) por consulta ao banco/CRM: nenhum componente conhece a origem do dado.
 
 > `--reason` é o campo mais importante do cadastro. É o que transforma um convite em reconhecimento. Escreva na voz do Erick, em primeira pessoa, citando algo real da relação.
 

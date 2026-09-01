@@ -1,7 +1,4 @@
 import { NextResponse } from "next/server";
-import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
 import { isAuthenticated } from "@/lib/admin-auth";
 import {
   deleteInvitation,
@@ -9,6 +6,7 @@ import {
   readInvitations,
   upsertInvitation,
 } from "@/lib/invitations.server";
+import { uploadImage } from "@/lib/storage.server";
 import { INVITE_DEFAULTS, TIERS } from "@/lib/event";
 import { slugify } from "@/lib/format";
 import type { Invitation, InviteStatus, InviteTier } from "@/lib/types";
@@ -65,11 +63,7 @@ async function saveImage(file: File): Promise<string> {
     (ext === "webp" && bytes.toString("ascii", 0, 4) === "RIFF" && bytes.toString("ascii", 8, 12) === "WEBP");
   if (!valid) throw new Error("invalid_image");
 
-  const directory = join(process.cwd(), "public", "uploads");
-  await mkdir(directory, { recursive: true });
-  const name = `${randomUUID()}.${ext}`;
-  await writeFile(join(directory, name), bytes);
-  return `/uploads/${name}`;
+  return uploadImage(bytes, ext, file.type);
 }
 
 export async function DELETE(req: Request) {
