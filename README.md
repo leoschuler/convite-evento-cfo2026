@@ -126,7 +126,7 @@ Caminhos em [lib/media.ts](lib/media.ts). Para trocar uma foto, altere o `src` a
 ## Onde plugar o backend
 
 - [lib/invitations.ts](lib/invitations.ts) → `getInvitation(slug)` e `acceptInvitation(slug, payload)`
-- [app/api/guest/[slug]/accept/route.ts](app/api/guest/[slug]/accept/route.ts) → grava o aceite (hoje valida e devolve `ok`)
+- [app/api/guest/[slug]/accept/route.ts](app/api/guest/[slug]/accept/route.ts) → valida o aceite e grava `invite_status: "ACCEPTED"` no convite (bucket R2, via [lib/invitations.server.ts](lib/invitations.server.ts))
 
 Contrato em [lib/types.ts](lib/types.ts). Campos novos entram como opcionais.
 
@@ -169,7 +169,7 @@ app/
   guest/[slug]/page.tsx        v3 (atual)
   v2/guest/[slug]/page.tsx     v2
   v1/guest/[slug]/page.tsx     v1
-  api/guest/[slug]/accept/     aceite (stub validado)
+  api/guest/[slug]/accept/     aceite (valida e grava invite_status: ACCEPTED)
 components/cfo-invite/         base compartilhada + Plate
 components/cfo-invite/v3/      a experiência atual
 components/cfo-invite/v2/      congelada

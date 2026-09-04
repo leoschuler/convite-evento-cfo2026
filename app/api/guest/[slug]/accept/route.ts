@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
-import { getInvitation } from "@/lib/invitations.server";
+import { getInvitation, upsertInvitation } from "@/lib/invitations.server";
 
-/**
- * Stub do aceite. Valida o convite e devolve ok.
- * ponytail: sem persistência — plugar o gravador (DB/CRM) exatamente aqui.
- */
 export async function POST(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const invitation = await getInvitation(slug);
@@ -17,7 +13,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
   const body = await req.json().catch(() => null);
   if (!isValid(body)) return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
 
-  return NextResponse.json({ ok: true, invite_slug: slug, invite_status: "ACCEPTED" });
+  const updated = await upsertInvitation({ ...invitation, invite_status: "ACCEPTED" }, slug);
+  return NextResponse.json({ ok: true, invite_slug: slug, invite_status: updated.invite_status });
 }
 
 function isValid(b: unknown): boolean {
