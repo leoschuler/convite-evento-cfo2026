@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { useReducedMotion } from "motion/react";
 import { gsap, useGSAP } from "@/lib/gsap";
-import { EVENT } from "@/lib/event";
+import { EVENT, TIERS } from "@/lib/event";
 import { PHOTOS } from "@/lib/media";
 import { companyArticle, inviteCode } from "@/lib/format";
 import { useInvite } from "../InviteProvider";
@@ -98,7 +98,7 @@ export default function HeroReal() {
         >
           <Tag label="Quando" value={EVENT.dateShort} bright />
           <Tag label="Onde" value={`${EVENT.venue} · ${EVENT.city}`} bright />
-          <Tag label="Acesso" value={tierLabel} />
+          <Tag label="Acesso" value={ TIERS[invitation.invite_tier].label + " ou " + TIERS[invitation.invite_tier].value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} />
           <Tag label="Convite" value={inviteCode(invitation.guest_id)} />
         </div>
 

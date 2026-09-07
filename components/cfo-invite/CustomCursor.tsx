@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 
+/** Liga o cursor customizado (círculo que segue o mouse). Desligado por padrão. */
+const CUSTOM_CURSOR_ENABLED = false;
+
 /**
  * Cursor discreto. Lê data-cursor="EXPLORE|PLAY|ACCEPT|..." do elemento sob o mouse.
  * Só existe em ponteiro fino — mobile nunca depende dele.
@@ -15,6 +18,12 @@ export default function CustomCursor() {
 
   // 1) decide se o cursor existe — só então os elementos são montados
   useEffect(() => {
+    if (!CUSTOM_CURSOR_ENABLED) {
+      // Garante o cursor nativo mesmo se um data-cursor-on de uma sessão
+      // anterior (antes de desligar a flag) tiver ficado gravado no body.
+      delete document.body.dataset.cursorOn;
+      return;
+    }
     const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     if (fine && !prefersReducedMotion()) setOn(true);
   }, []);
@@ -73,7 +82,7 @@ export default function CustomCursor() {
     gsap.to(dot.current, { scale: label ? 0 : 1, duration: 0.35, ease: "expo.out" });
   }, [label, on]);
 
-  if (!on) return null;
+  if (!CUSTOM_CURSOR_ENABLED || !on) return null;
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[200]" aria-hidden>

@@ -83,6 +83,6 @@ export interface AcceptPayload {
   guest_name: string;
   guest_position: string;
   company_name: string;
-  email: string;
-  whatsapp: string;
+  guest_email: string;
+  guest_whatsapp: string;
 }

@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
-import { brl } from "@/lib/format";
+import { brl, whatsappLink } from "@/lib/format";
 import { EVENT } from "@/lib/event";
 import { useInvite } from "./InviteProvider";
 import { Chapter, MaskLine, Reveal } from "./primitives";
@@ -11,6 +11,14 @@ import { Chapter, MaskLine, Reveal } from "./primitives";
 export default function AccessReveal() {
   const { invitation, tierLabel } = useInvite();
   const root = useRef<HTMLDivElement>(null);
+
+const phone_concierge = invitation.concierge_whatsapp?.trim() || "";
+  const href_concierge = phone_concierge
+    ? whatsappLink(
+        phone_concierge,
+        `Olá, aqui é ${invitation.guest_name}, da ${invitation.company_name}. Confirmei meu convite para o ${EVENT.name}.`,
+      )
+    : null;
 
   useGSAP(
     () => {

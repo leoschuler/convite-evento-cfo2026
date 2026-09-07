@@ -2,7 +2,8 @@
 
 import { useRef } from "react";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
-import { brl, gendered } from "@/lib/format";
+import { gendered, whatsappLink } from "@/lib/format";
+
 import { EVENT, TIERS } from "@/lib/event";
 import { useInvite } from "../InviteProvider";
 import { Chapter, MaskLine, Reveal } from "../primitives";
@@ -16,6 +17,14 @@ export default function AccessRealReveal() {
   const root = useRef<HTMLDivElement>(null);
   const tier = TIERS[invitation.invite_tier];
   const benefits = invitation.vip_benefits?.length ? invitation.vip_benefits : tier.benefits;
+
+const phone_concierge = invitation.concierge_whatsapp?.trim() || "";
+  const href_concierge = phone_concierge
+    ? whatsappLink(
+        phone_concierge,
+        `Olá, aqui é ${invitation.guest_name}, da ${invitation.company_name}. Confirmei meu convite para o ${EVENT.name}.`,
+      )
+    : null;
 
   useGSAP(
     () => {
@@ -90,7 +99,7 @@ export default function AccessRealReveal() {
               <div className="label mb-4 mt-8">Valor do ingresso</div>
               <div className="relative inline-block">
                 <span className="ar-value block text-[clamp(2.2rem,6vw,3.6rem)] font-medium tracking-[-0.03em] text-frost">
-                  {brl(tier.value)}
+                  {tier.value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                 </span>
                 <span
                   className="ar-strike absolute left-0 top-1/2 h-px w-full origin-left scale-x-0 bg-cyan"
@@ -129,8 +138,8 @@ export default function AccessRealReveal() {
           </ul>
 
           <p className="ar-note mt-10 max-w-[44ch] text-sm leading-relaxed text-frost/45 opacity-0">
-            Este é o valor real do ingresso {tierLabel} no site oficial. Ele não foi descontado — ele foi assumido por{" "}
-            {EVENT.ceo}.
+            Seu Desconto é do valor integral do ingresso {tierLabel} no site oficial, Ele não foi descontado — ele foi assumido por{" "}
+            {EVENT.ceo}.  <br/> Você pode usar esse valor para adquirir gratuitamente o ingresso, ou abater do valor de um ingresso de outra categoria. 
           </p>
         </div>
       </div>

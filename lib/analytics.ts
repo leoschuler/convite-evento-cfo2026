@@ -4,6 +4,7 @@ import type { Invitation } from "./types";
 export type InviteEvent =
   | "invite_page_view"
   | "invite_gate_opened"
+  | "invite_gate_skipped"
   | "invite_experience_started"
   | "invite_scroll_25"
   | "invite_scroll_50"

@@ -1,6 +1,6 @@
 "use client";
 
-import { EVENT } from "@/lib/event";
+import { EVENT,  TIERS } from "@/lib/event";
 import { docHash, inviteCode } from "@/lib/format";
 import { useInvite } from "./InviteProvider";
 
@@ -20,7 +20,7 @@ export default function PremiumFooter() {
           <FootRow k="Issued to" v={invitation.company_name} />
           <FootRow k="Guest" v={inviteCode(invitation.guest_id)} />
           <FootRow k="Authorized by" v={EVENT.ceo} />
-          <FootRow k="Access" v={tierLabel} />
+          <FootRow k="Access" v={tierLabel + " | " + TIERS[invitation.invite_tier].value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) + " Discount"} />
           <FootRow k="Status" v={status === "ACCEPTED" ? "Confirmed" : "Reserved"} />
           <FootRow k="Doc" v={docHash(invitation.invite_slug, 12)} />
         </div>

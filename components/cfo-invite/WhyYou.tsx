@@ -18,7 +18,7 @@ export default function WhyYou() {
       <Chapter n="02" title="Why You" />
 
       <MaskLine as="h2" className="display text-[clamp(2rem,5.4vw,4.2rem)]">
-        Por que você está aqui.
+        Por que você está aqui?
       </MaskLine>
 
       <div className="mt-16 grid gap-14 lg:grid-cols-[1.35fr_1fr] lg:gap-20">

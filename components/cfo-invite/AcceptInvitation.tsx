@@ -15,7 +15,7 @@ type Phase = "idle" | "authorizing" | "form" | "submitting" | "done";
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 export default function AcceptInvitation() {
-  const { invitation, markAccepted, ev, acceptSignal } = useInvite();
+  const { invitation, markAccepted, ev, acceptSignal, setFormOpen } = useInvite();
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
   const payload = useRef<AcceptPayload | null>(null);
@@ -40,6 +40,11 @@ export default function AcceptInvitation() {
     const t = setTimeout(() => setPhase("form"), 1900);
     return () => clearTimeout(t);
   }, [phase]);
+
+  useEffect(() => {
+    setFormOpen(phase === "form" || phase === "submitting");
+    return () => setFormOpen(false);
+  }, [phase, setFormOpen]);
 
   useEffect(() => {
     if (phase !== "done") return;

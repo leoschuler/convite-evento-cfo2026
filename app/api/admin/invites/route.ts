@@ -3,16 +3,13 @@ import { isAuthenticated } from "@/lib/admin-auth";
 import {
   deleteInvitation,
   nextGuestId,
+  normalizeInviteFields,
   readInvitations,
   upsertInvitation,
 } from "@/lib/invitations.server";
-import { uploadImage } from "@/lib/storage.server";
-import { INVITE_DEFAULTS, TIERS } from "@/lib/event";
-import { slugify } from "@/lib/format";
-import type { Invitation, InviteStatus, InviteTier } from "@/lib/types";
+import { uploadImage, WriteConflictError } from "@/lib/storage.server";
+import type { Invitation } from "@/lib/types";
 
-const TIER_KEYS = Object.keys(TIERS) as InviteTier[];
-const STATUSES: InviteStatus[] = ["AVAILABLE", "ACCEPTED", "EXPIRED", "CANCELLED"];
 const IMAGE_TYPES = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" } as const;
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
@@ -47,6 +44,9 @@ export async function POST(req: Request) {
     await upsertInvitation(invite, originalSlug);
     return NextResponse.json({ ok: true, invite });
   } catch (e) {
+    if (e instanceof WriteConflictError) {
+      return NextResponse.json({ error: "try_again" }, { status: 503 });
+    }
     const code = e instanceof Error ? e.message : "invalid_payload";
     return NextResponse.json({ error: code }, { status: code === "slug_taken" ? 409 : 400 });
   }
@@ -72,60 +72,20 @@ export async function DELETE(req: Request) {
   const slug = new URL(req.url).searchParams.get("slug");
   if (!slug) return NextResponse.json({ error: "missing_slug" }, { status: 400 });
 
-  const removed = await deleteInvitation(slug);
-  return NextResponse.json({ ok: removed }, { status: removed ? 200 : 404 });
+  try {
+    const removed = await deleteInvitation(slug);
+    return NextResponse.json({ ok: removed }, { status: removed ? 200 : 404 });
+  } catch (e) {
+    if (e instanceof WriteConflictError) {
+      return NextResponse.json({ error: "try_again" }, { status: 503 });
+    }
+    throw e;
+  }
 }
 
 /** Valida e completa o registro. O cliente nunca define guest_id nem o valor do ingresso. */
 async function normalize(b: Record<string, unknown>, originalSlug?: string): Promise<Invitation> {
-  const str = (k: string) => (typeof b[k] === "string" ? (b[k] as string).trim() : "");
-  const nullable = (k: string) => {
-    const v = str(k);
-    return v.length ? v : null;
-  };
-
-  const guest_name = str("guest_name");
-  const company_name = str("company_name");
-  if (!guest_name) throw new Error("guest_name_required");
-  if (!company_name) throw new Error("company_name_required");
-
-  const tier = (str("invite_tier").toUpperCase() as InviteTier) || "MESA";
-  if (!TIER_KEYS.includes(tier)) throw new Error("invalid_tier");
-
-  const status = (str("invite_status").toUpperCase() as InviteStatus) || "AVAILABLE";
-  if (!STATUSES.includes(status)) throw new Error("invalid_status");
-
-  const slug = slugify(str("invite_slug") || `${guest_name}-${company_name.split(/\s+/)[0]}`);
-  if (!slug) throw new Error("invalid_slug");
-
-  const existingId = str("guest_id");
-
-  return {
-    invite_slug: slug,
-    guest_id: existingId && originalSlug ? existingId : await nextGuestId(),
-    guest_name,
-    guest_first_name: str("guest_first_name") || guest_name.split(/\s+/)[0],
-    guest_position: nullable("guest_position"),
-    guest_gender: str("guest_gender").toUpperCase() === "F" ? "F" : "M",
-    guest_photo: nullable("guest_photo"),
-    guest_whatsapp: nullable("guest_whatsapp"),
-    guest_email: nullable("guest_email"),
-    company_name,
-    company_gender: str("company_gender").toUpperCase() === "M" ? "M" : "F",
-    company_logo: nullable("company_logo"),
-    relationship_brand: (nullable("relationship_brand") as Invitation["relationship_brand"]) ?? null,
-    relationship_since: nullable("relationship_since"),
-    account_executive_name: nullable("account_executive_name"),
-    invitation_reason: nullable("invitation_reason"),
-    invite_tier: tier,
-    invite_commercial_value: TIERS[tier].value,
-    invite_expiration: nullable("invite_expiration"),
-    invite_status: status,
-    event_date: str("event_date") || INVITE_DEFAULTS.event_date,
-    event_location: str("event_location") || INVITE_DEFAULTS.event_location,
-    concierge_name: nullable("concierge_name") ?? INVITE_DEFAULTS.concierge_name,
-    concierge_whatsapp: nullable("concierge_whatsapp") ?? INVITE_DEFAULTS.concierge_whatsapp,
-    erick_video_url: nullable("erick_video_url"),
-    erick_photo: nullable("erick_photo"),
-  };
+  const fields = normalizeInviteFields(b);
+  const existingId = typeof b.guest_id === "string" ? b.guest_id.trim() : "";
+  return { ...fields, guest_id: existingId && originalSlug ? existingId : await nextGuestId() };
 }

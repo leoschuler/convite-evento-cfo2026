@@ -47,7 +47,13 @@ function Experience() {
   // As posições mudam quando o gate sai e o scroll é liberado.
   useEffect(() => {
     if (!entered) return;
-    const id = requestAnimationFrame(() => ScrollTrigger.refresh());
+    const id = requestAnimationFrame(() => {
+      try {
+        ScrollTrigger.refresh();
+      } catch {
+        // Bug interno do ScrollTrigger ao recalcular muitos triggers criados de uma vez.
+      }
+    });
     return () => cancelAnimationFrame(id);
   }, [entered]);
 

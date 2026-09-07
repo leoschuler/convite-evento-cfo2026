@@ -15,7 +15,7 @@ const APPEAR_AT = 0.2;
  * para nunca existirem dois botões pedindo a mesma coisa.
  */
 export default function FloatingAccept() {
-  const { invitation, status, entered, requestAccept, tierLabel } = useInvite();
+  const { invitation, status, entered, requestAccept, tierLabel, formOpen } = useInvite();
   const [progress, setProgress] = useState(0);
   const [ctaVisible, setCtaVisible] = useState(false);
   const bar = useRef<HTMLDivElement>(null);
@@ -64,7 +64,7 @@ export default function FloatingAccept() {
     return () => io.disconnect();
   }, [entered, status]);
 
-  const show = entered && status !== "ACCEPTED" && progress > APPEAR_AT && !ctaVisible;
+  const show = entered && status !== "ACCEPTED" && progress > APPEAR_AT && !ctaVisible && !formOpen;
 
   return (
     <AnimatePresence>
@@ -95,7 +95,7 @@ export default function FloatingAccept() {
                 <span className="text-[0.82rem] text-frost/45 line-through">
                   {brl(TIERS[invitation.invite_tier].value)}
                 </span>
-                <span className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-cyan">Cortesia</span>
+                <span className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-cyan">Desconto</span>
               </div>
             </div>
 
