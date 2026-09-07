@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { motion, useMotionTemplate, useMotionValue, useSpring } from "motion/react";
 import { docHash, inviteCode } from "@/lib/format";
-import { EVENT } from "@/lib/event";
+import { EVENT, TIERS } from "@/lib/event";
 import { useInvite } from "./InviteProvider";
 
 type Props = {
@@ -102,7 +102,7 @@ export default function PersonalizedTicket({ confirmed = false, authorizing = fa
                   confirmed ? "metal-text" : "text-platinum/80"
                 }`}
               >
-                {tierLabel}
+                {tierLabel} | {TIERS[invitation.invite_tier].value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
               </div>
               <div className="label mt-2">{inviteCode(invitation.guest_id)}</div>
             </div>
@@ -126,7 +126,7 @@ export default function PersonalizedTicket({ confirmed = false, authorizing = fa
           {/* metadados */}
           <dl className="space-y-2.5">
             <Row k="Authorized by" v={EVENT.ceo.toUpperCase()} />
-            <Row k="Access" v={invitation.invite_tier} />
+            <Row k="ACCESS" v={ TIERS[invitation.invite_tier].label + " | " + TIERS[invitation.invite_tier].value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} />
             <Row k="Event" v={invitation.event_date} />
             <Row k="Venue" v={invitation.event_location} />
             <Row

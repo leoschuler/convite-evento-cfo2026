@@ -14,7 +14,7 @@ export const EVENT = {
   claimSupport:
     "Todo mundo comprou ferramenta. Quase ninguém consegue mostrar o que ela devolveu em margem, em caixa e em risco.",
   promise:
-    "Dois dias. Você sai com as decisões que precisa tomar antes do próximo trimestre — e com quem já tomou elas.",
+    "Dois dias. Você sai com as decisões que precisa tomar antes do próximo trimestre — e com quem já decidiu.",
 
   date: "22 e 23 de setembro de 2026",
   dateShort: "22–23 SET 2026",
@@ -92,13 +92,14 @@ export const TRACKS = [
  */
 export const TIERS: Record<
   InviteTier,
-  { label: string; short: string; value: number; rank: number; benefits: VipBenefit[] }
+  { label: string; short: string; value: number; rank: number; benefits: VipBenefit[] , cupom: string}
 > = {
   ARQUIBANCADA: {
     label: "Arquibancada Inferior",
     short: "Arquibancada",
     value: 497,
     rank: 1,
+    cupom:"CONVITE-X5FWAMWP",
     benefits: [{ title: "Acesso à plenária" }, { title: "Acesso à feira de negócios" }],
   },
   MESA: {
@@ -106,6 +107,7 @@ export const TIERS: Record<
     short: "Mesa",
     value: 997,
     rank: 2,
+    cupom: "CONVITE-KYKNW2AM",
     benefits: [
       { title: "Acesso à plenária" },
       { title: "Acesso à feira de negócios" },
@@ -119,6 +121,7 @@ export const TIERS: Record<
     short: "Camarote",
     value: 1897,
     rank: 3,
+    cupom: "CONVITE-8J2K9L3N",
     benefits: [
       { title: "Acesso à plenária" },
       { title: "Acesso à feira de negócios" },

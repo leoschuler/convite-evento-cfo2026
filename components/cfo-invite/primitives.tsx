@@ -3,7 +3,13 @@
 import { useRef } from "react";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
 
-/** Revela filhos marcados com data-reveal quando a seção entra na viewport. */
+/**
+ * Revela filhos marcados com data-reveal quando a seção entra na viewport.
+ * Com `immediate`, ignora o scroll e revela direto no mount — para seções que
+ * já são o destino deliberado do usuário (ex: confirmação), onde um salto de
+ * scroll programático pode acontecer antes do ScrollTrigger conseguir medir a
+ * página, deixando o conteúdo preso invisível.
+ */
 export function Reveal({
   children,
   className,
@@ -11,6 +17,7 @@ export function Reveal({
   delay = 0,
   stagger = 0.09,
   start = "top 84%",
+  immediate = false,
 }: {
   children: React.ReactNode;
   className?: string;
@@ -18,6 +25,7 @@ export function Reveal({
   delay?: number;
   stagger?: number;
   start?: string;
+  immediate?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -34,15 +42,22 @@ export function Reveal({
       }
 
       gsap.set(targets, { opacity: 0, y });
-      gsap.to(targets, {
-        opacity: 1,
-        y: 0,
-        duration: 1.2,
-        ease: "power3.out",
-        stagger,
-        delay,
-        scrollTrigger: { trigger: root, start, once: true },
-      });
+      try {
+        gsap.to(targets, {
+          opacity: 1,
+          y: 0,
+          duration: 1.2,
+          ease: "power3.out",
+          stagger,
+          delay,
+          ...(immediate ? {} : { scrollTrigger: { trigger: root, start, once: true } }),
+        });
+      } catch {
+        // Bug interno do ScrollTrigger ao criar muitos triggers em lote (ex: quando o
+        // gate libera a página inteira de uma vez): garante que o conteúdo não fique
+        // preso em opacity:0 caso a criação do trigger falhe.
+        gsap.set(targets, { opacity: 1, y: 0 });
+      }
     },
     { scope: ref, dependencies: [] },
   );
@@ -54,19 +69,24 @@ export function Reveal({
   );
 }
 
-/** Linha de texto que sobe de dentro de uma máscara. Uso: títulos grandes. */
+/**
+ * Linha de texto que sobe de dentro de uma máscara. Uso: títulos grandes.
+ * Com `immediate`, ignora o scroll e revela direto no mount (ver `Reveal`).
+ */
 export function MaskLine({
   children,
   className,
   delay = 0,
   start = "top 86%",
   as: Tag = "span",
+  immediate = false,
 }: {
   children: React.ReactNode;
   className?: string;
   delay?: number;
   start?: string;
   as?: "span" | "div" | "h2" | "h3" | "p";
+  immediate?: boolean;
 }) {
   const ref = useRef<HTMLElement>(null);
 
@@ -83,13 +103,17 @@ export function MaskLine({
       }
 
       gsap.set(inner, { yPercent: 115, opacity: 1 });
-      gsap.to(inner, {
-        yPercent: 0,
-        duration: 1.25,
-        ease: "expo.out",
-        delay,
-        scrollTrigger: { trigger: root, start, once: true },
-      });
+      try {
+        gsap.to(inner, {
+          yPercent: 0,
+          duration: 1.25,
+          ease: "expo.out",
+          delay,
+          ...(immediate ? {} : { scrollTrigger: { trigger: root, start, once: true } }),
+        });
+      } catch {
+        gsap.set(inner, { yPercent: 0, opacity: 1 });
+      }
     },
     { scope: ref, dependencies: [] },
   );

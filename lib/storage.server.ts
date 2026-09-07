@@ -44,22 +44,52 @@ export async function uploadImage(bytes: Buffer, ext: string, contentType: strin
   return `${env("R2_PUBLIC_BASE_URL").replace(/\/$/, "")}/${key}`;
 }
 
-export async function readInvitationsFromBucket(): Promise<string | null> {
+/** Lançado quando uma escrita condicional perde a corrida (ETag mudou desde a leitura). */
+export class WriteConflictError extends Error {
+  constructor() {
+    super("write_conflict");
+    this.name = "WriteConflictError";
+  }
+}
+
+function isPreconditionFailed(e: unknown): boolean {
+  const err = e as { name?: string; Code?: string; $metadata?: { httpStatusCode?: number } } | null | undefined;
+  if (!err) return false;
+  if (err.$metadata?.httpStatusCode === 412) return true;
+  return /precondition/i.test(err.name || err.Code || "");
+}
+
+export async function readInvitationsFromBucket(): Promise<{ body: string; etag: string | null } | null> {
   try {
     const res = await r2().send(new GetObjectCommand({ Bucket: env("R2_BUCKET_NAME"), Key: DATA_KEY }));
-    return (await res.Body?.transformToString()) ?? null;
+    const body = await res.Body?.transformToString();
+    if (body == null) return null;
+    return { body, etag: res.ETag ?? null };
   } catch {
     return null;
   }
 }
 
-export async function writeInvitationsToBucket(json: string): Promise<void> {
-  await r2().send(
-    new PutObjectCommand({
-      Bucket: env("R2_BUCKET_NAME"),
-      Key: DATA_KEY,
-      Body: json,
-      ContentType: "application/json",
-    })
-  );
+/**
+ * `ifMatch` (o ETag lido junto com a versão atual) faz o R2 recusar a escrita
+ * com 412 se o objeto mudou desde a leitura — é o que permite detectar (e
+ * reagir a) dois requests concorrentes tentando escrever a partir da mesma
+ * versão do arquivo. Sem `ifMatch`, a escrita é incondicional (bootstrap: o
+ * objeto ainda não existe).
+ */
+export async function writeInvitationsToBucket(json: string, ifMatch?: string | null): Promise<void> {
+  try {
+    await r2().send(
+      new PutObjectCommand({
+        Bucket: env("R2_BUCKET_NAME"),
+        Key: DATA_KEY,
+        Body: json,
+        ContentType: "application/json",
+        ...(ifMatch ? { IfMatch: ifMatch } : {}),
+      })
+    );
+  } catch (e) {
+    if (isPreconditionFailed(e)) throw new WriteConflictError();
+    throw e;
+  }
 }

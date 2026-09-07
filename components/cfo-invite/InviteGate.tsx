@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
-import { docHash, gendered, initials, inviteCode } from "@/lib/format";
-import { EVENT, RELATIONSHIP_LOGOS } from "@/lib/event";
+import { docHash, initials, inviteCode } from "@/lib/format";
+import { EVENT, RELATIONSHIP_LOGOS, TIERS } from "@/lib/event";
+import { scrollToId } from "@/lib/scroll";
 import type { Invitation } from "@/lib/types";
 import { useInvite } from "./InviteProvider";
+
 
 /**
  * Abertura cinematográfica. Nada da página é revelado antes daqui.
@@ -21,6 +23,8 @@ export default function InviteGate() {
   const returning = status === "ACCEPTED";
 
   useEffect(() => {
+    // Quem já aceitou não passa pelo gate: vai direto para a confirmação, sem lock de scroll.
+    if (returning) return;
     // O navegador restaura o scroll ao recarregar; a experiência precisa recomeçar do topo.
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
     window.scrollTo(0, 0);
@@ -29,10 +33,18 @@ export default function InviteGate() {
     return () => {
       document.body.dataset.locked = "false";
     };
-  }, [ev]);
+  }, [ev, returning]);
+
+  useEffect(() => {
+    if (!returning) return;
+    enter();
+    ev("invite_gate_skipped");
+    requestAnimationFrame(() => scrollToId("confirmation"));
+  }, [returning, enter, ev]);
 
   useGSAP(
     () => {
+      if (returning) return;
       const reduced = prefersReducedMotion();
 
       gsap.set(".g-stage-2", { opacity: 0, pointerEvents: "none" });
@@ -102,16 +114,13 @@ export default function InviteGate() {
       .to(".g-panel-bottom", { yPercent: 100, duration: 1.15 }, "<");
   };
 
-  if (gone) return null;
+  // Quem já aceitou nunca chega a renderizar o gate — ver o efeito de "invite_gate_skipped" acima.
+  if (returning || gone) return null;
 
-  const headline = returning
-    ? `${gendered(invitation.guest_gender, "Bem-vindo", "Bem-vinda")} de volta, ${invitation.guest_first_name}.`
-    : `${invitation.guest_first_name},`;
-  const subline = returning ? "seu acesso está confirmado." : "seu nome está na lista.";
-  const support = returning
-    ? `Sua credencial do ${EVENT.name} continua reservada em seu nome.`
-    : `${EVENT.ceo} reservou pessoalmente um lugar para você no ${EVENT.name}.`;
-  const cta = returning ? "REVER MEU CONVITE" : "ACESSAR MEU CONVITE";
+  const headline = `${invitation.guest_first_name},`;
+  const subline = "seu nome está na lista.";
+  const support = `${EVENT.ceo} reservou pessoalmente um lugar para você no ${EVENT.name}.`;
+  const cta = "ACESSAR MEU CONVITE";
 
   return (
     <div ref={root} className="fixed inset-0 z-[150]" role="dialog" aria-modal="true" aria-label="Convite privado">
@@ -197,7 +206,7 @@ export default function InviteGate() {
           <div className="g-cta mt-12 flex flex-wrap items-center gap-x-8 gap-y-5">
             <EnterButton label={cta} onClick={handleEnter} />
             <div className="flex items-center gap-3">
-              <span className="label">{tierLabel}</span>
+              <span className="label">{TIERS[invitation.invite_tier].value}</span>
               <span className="h-3 w-px bg-line" aria-hidden />
               <span className="label">{inviteCode(invitation.guest_id)}</span>
             </div>

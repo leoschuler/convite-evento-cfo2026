@@ -38,6 +38,25 @@ const blank = (): Invitation => ({
   erick_photo: null,
 });
 
+const BATCH_ERRORS: Record<string, string> = {
+  guest_name_required: "nome do convidado é obrigatório",
+  company_name_required: "nome da empresa é obrigatório",
+  invalid_tier: "categoria inválida",
+  invalid_status: "status inválido",
+  invalid_slug: "não foi possível gerar um link (slug) válido",
+  invalid_item: "item inválido — precisa ser um objeto",
+  slug_duplicated_in_batch: "link (slug) repetido dentro do próprio lote",
+  slug_taken: "já existe um convite com esse link (slug)",
+};
+
+function batchErrorMessage(body: { error?: string; index?: number }): string {
+  if (body.error === "empty_batch") return "O array está vazio.";
+  if (body.error === "batch_too_large") return "Lote grande demais (máximo 1000 convites por vez).";
+  if (body.error === "try_again") return "Não foi possível salvar agora. Tente novamente em instantes.";
+  const reason = body.error ? (BATCH_ERRORS[body.error] ?? body.error) : "erro desconhecido";
+  return typeof body.index === "number" ? `Item ${body.index + 1}: ${reason}.` : `Não foi possível importar (${reason}).`;
+}
+
 export default function AdminPanel({ initial }: { initial: Invitation[] }) {
   const [invites, setInvites] = useState(initial);
   const [draft, setDraft] = useState<Invitation | null>(null);
@@ -46,6 +65,8 @@ export default function AdminPanel({ initial }: { initial: Invitation[] }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [batchOpen, setBatchOpen] = useState(false);
+  const [batchNotice, setBatchNotice] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -123,6 +144,20 @@ ${inviteUrl(i.invite_slug)}`;
     setError(null);
   };
 
+  const importBatch = async (items: unknown[]) => {
+    const res = await fetch("/api/admin/invites/batch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(items),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(batchErrorMessage(body));
+    setBatchOpen(false);
+    setBatchNotice(`${body.created?.length ?? 0} convite(s) importado(s).`);
+    setTimeout(() => setBatchNotice(null), 4000);
+    await reload();
+  };
+
   const startEdit = (i: Invitation) => {
     setDraft({ ...i });
     setOriginalSlug(i.invite_slug);
@@ -150,6 +185,12 @@ ${inviteUrl(i.invite_slug)}`;
             + Novo convite
           </button>
           <button
+            onClick={() => setBatchOpen(true)}
+            className="border border-edge px-5 py-2.5 font-mono text-[0.6rem] uppercase tracking-[0.22em] text-frost transition-colors hover:border-cyan"
+          >
+            Importar em lote
+          </button>
+          <button
             onClick={async () => {
               await fetch("/api/admin/login", { method: "DELETE" });
               location.reload();
@@ -161,10 +202,11 @@ ${inviteUrl(i.invite_slug)}`;
         </div>
       </header>
 
-      <div className="mb-4 flex flex-wrap gap-6">
+      <div className="mb-4 flex flex-wrap items-center gap-6">
         <Stat label="Total" value={String(invites.length)} />
         <Stat label="Disponíveis" value={String(invites.filter((i) => i.invite_status === "AVAILABLE").length)} />
         <Stat label="Aceitos" value={String(invites.filter((i) => i.invite_status === "ACCEPTED").length)} />
+        {batchNotice && <span className="label text-cyan">{batchNotice}</span>}
       </div>
 
       <div className="overflow-x-auto border border-edge">
@@ -266,6 +308,8 @@ ${inviteUrl(i.invite_slug)}`;
           isNew={!originalSlug}
         />
       )}
+
+      {batchOpen && <BatchImport onImport={importBatch} onCancel={() => setBatchOpen(false)} />}
     </main>
   );
 }
@@ -447,6 +491,97 @@ function Editor({
             className="border border-cyan/40 px-8 py-3.5 font-mono text-[0.62rem] uppercase tracking-[0.22em] text-frost transition-colors hover:border-cyan disabled:opacity-40"
           >
             {busy ? "Salvando…" : "Salvar convite"}
+          </button>
+          <button onClick={onCancel} className="label transition-colors hover:text-frost">
+            cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const BATCH_PLACEHOLDER = `[
+  {
+    "guest_name": "Maria Silva",
+    "company_name": "Empresa X",
+    "guest_email": "maria@empresax.com",
+    "guest_whatsapp": "11999999999",
+    "invite_tier": "MESA"
+  }
+]`;
+
+function BatchImport({
+  onImport,
+  onCancel,
+}: {
+  onImport: (items: unknown[]) => Promise<void>;
+  onCancel: () => void;
+}) {
+  const [text, setText] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = async () => {
+    setError(null);
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      setError("JSON inválido — confira vírgulas e chaves.");
+      return;
+    }
+    if (!Array.isArray(parsed) || !parsed.length) {
+      setError("Cole um array com pelo menos um convite.");
+      return;
+    }
+
+    setBusy(true);
+    try {
+      await onImport(parsed);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Não foi possível importar.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-night/90 px-4 py-10 backdrop-blur-xl md:px-8">
+      <div className="mx-auto w-full max-w-[760px] border border-edge bg-slate p-6 md:p-9">
+        <div className="mb-6 flex items-baseline justify-between gap-4">
+          <h2 className="text-[1.3rem] tracking-[-0.02em] text-frost">Importar convites em lote</h2>
+          <button onClick={onCancel} className="label transition-colors hover:text-frost">
+            fechar
+          </button>
+        </div>
+
+        <p className="label mb-4 leading-[1.8] opacity-80">
+          Cole um array JSON de convites. Só <code>guest_name</code> e <code>company_name</code> são
+          obrigatórios — o resto usa os mesmos padrões do formulário individual (slug gerado a partir do
+          nome, categoria MESA, etc). <code>guest_id</code> é sempre gerado pelo servidor; se vier no JSON,
+          é ignorado.
+        </p>
+
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder={BATCH_PLACEHOLDER}
+          spellCheck={false}
+          rows={16}
+          className="w-full resize-y border border-edge bg-transparent p-3 font-mono text-[0.78rem] leading-relaxed text-frost outline-none placeholder:text-dim/70 focus:border-cyan"
+        />
+
+        {error && <p className="mt-4 font-mono text-[0.62rem] uppercase tracking-[0.16em] text-ember">{error}</p>}
+
+        <div className="mt-6 flex items-center gap-5">
+          <button
+            onClick={submit}
+            disabled={busy || !text.trim()}
+            className="border border-cyan/40 px-8 py-3.5 font-mono text-[0.62rem] uppercase tracking-[0.22em] text-frost transition-colors hover:border-cyan disabled:opacity-40"
+          >
+            {busy ? "Importando…" : "Importar"}
           </button>
           <button onClick={onCancel} className="label transition-colors hover:text-frost">
             cancelar

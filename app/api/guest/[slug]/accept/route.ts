@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getInvitation, upsertInvitation } from "@/lib/invitations.server";
+import { WriteConflictError } from "@/lib/storage.server";
 
 export async function POST(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -13,8 +14,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
   const body = await req.json().catch(() => null);
   if (!isValid(body)) return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
 
-  const updated = await upsertInvitation({ ...invitation, invite_status: "ACCEPTED" }, slug);
-  return NextResponse.json({ ok: true, invite_slug: slug, invite_status: updated.invite_status });
+  try {
+    const updated = await upsertInvitation({ ...invitation, ...body, invite_status: "ACCEPTED" }, slug);
+    return NextResponse.json({ ok: true, invite_slug: slug, invite_status: updated.invite_status });
+  } catch (e) {
+    if (e instanceof WriteConflictError) {
+      return NextResponse.json({ error: "try_again" }, { status: 503 });
+    }
+    throw e;
+  }
 }
 
 function isValid(b: unknown): boolean {
@@ -24,9 +32,9 @@ function isValid(b: unknown): boolean {
   return (
     str("guest_name") &&
     str("company_name") &&
-    typeof v.email === "string" &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.email) &&
-    typeof v.whatsapp === "string" &&
-    v.whatsapp.replace(/\D/g, "").length >= 10
+    typeof v.guest_email === "string" &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.guest_email) &&
+    typeof v.guest_whatsapp === "string" &&
+    v.guest_whatsapp.replace(/\D/g, "").length >= 10
   );
 }

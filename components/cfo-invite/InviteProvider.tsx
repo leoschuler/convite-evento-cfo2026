@@ -17,6 +17,9 @@ type Ctx = {
   /** Incrementa quando algo fora da seção de CTA pede para abrir o aceite. */
   acceptSignal: number;
   requestAccept: () => void;
+  /** true enquanto o formulário de aceite (ou o envio) está em tela. */
+  formOpen: boolean;
+  setFormOpen: (open: boolean) => void;
 };
 
 const InviteCtx = createContext<Ctx | null>(null);
@@ -31,6 +34,7 @@ export function InviteProvider({
   const [status, setStatus] = useState<InviteStatus>(invitation.invite_status);
   const [entered, setEntered] = useState(false);
   const [acceptSignal, setAcceptSignal] = useState(0);
+  const [formOpen, setFormOpen] = useState(false);
 
   const context = useMemo(() => inviteContext(invitation), [invitation]);
 
@@ -61,8 +65,10 @@ export function InviteProvider({
       tierLabel: TIERS[invitation.invite_tier].label,
       acceptSignal,
       requestAccept,
+      formOpen,
+      setFormOpen,
     }),
-    [invitation, status, entered, enter, markAccepted, ev, acceptSignal, requestAccept],
+    [invitation, status, entered, enter, markAccepted, ev, acceptSignal, requestAccept, formOpen],
   );
 
   return <InviteCtx.Provider value={value}>{children}</InviteCtx.Provider>;

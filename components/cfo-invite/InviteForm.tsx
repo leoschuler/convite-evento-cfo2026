@@ -24,8 +24,8 @@ export default function InviteForm({
     guest_name: invitation.guest_name,
     guest_position: invitation.guest_position ?? "",
     company_name: invitation.company_name,
-    email: invitation.guest_email ?? "",
-    whatsapp: invitation.guest_whatsapp ? maskPhone(invitation.guest_whatsapp) : "",
+    guest_email: invitation.guest_email ?? "",
+    guest_whatsapp: invitation.guest_whatsapp ? maskPhone(invitation.guest_whatsapp) : "",
   });
   const [errors, setErrors] = useState<Errors>({});
 
@@ -34,18 +34,18 @@ export default function InviteForm({
 
   // Máscara aplicada a cada tecla: (11) 94234-3927. Impede número torto.
   const setPhone = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setValues((v) => ({ ...v, whatsapp: maskPhone(e.target.value) }));
+    setValues((v) => ({ ...v, guest_whatsapp: maskPhone(e.target.value) }));
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const next: Errors = {};
     if (!values.guest_name.trim()) next.guest_name = "Obrigatório";
     if (!values.company_name.trim()) next.company_name = "Obrigatório";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(values.email.trim())) next.email = "E-mail inválido";
-    if (!isValidPhone(values.whatsapp)) next.whatsapp = "Informe DDD + número";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(values.guest_email.trim())) next.guest_email = "E-mail inválido";
+    if (!isValidPhone(values.guest_whatsapp)) next.guest_whatsapp = "Informe DDD + número";
     setErrors(next);
     if (Object.keys(next).length) return;
-    onSubmit({ ...values, email: values.email.trim(), whatsapp: values.whatsapp.trim() });
+    onSubmit({ ...values, guest_email: values.guest_email.trim(), guest_whatsapp: values.guest_whatsapp.trim() });
   };
 
   return (
@@ -71,9 +71,9 @@ export default function InviteForm({
           inputMode="email"
           autoComplete="email"
           autoFocus
-          value={values.email}
-          onChange={set("email")}
-          error={errors.email}
+          value={values.guest_email}
+          onChange={set("guest_email")}
+          error={errors.guest_email}
         />
         <Field
           label="WhatsApp"
@@ -82,9 +82,9 @@ export default function InviteForm({
           autoComplete="tel"
           placeholder="(11) 90000-0000"
           maxLength={15}
-          value={values.whatsapp}
+          value={values.guest_whatsapp}
           onChange={setPhone}
-          error={errors.whatsapp}
+          error={errors.guest_whatsapp}
         />
       </div>
 
@@ -100,7 +100,8 @@ export default function InviteForm({
             {submitting ? "Confirmando…" : "Confirmar presença"}
           </span>
         </button>
-        <span className="label max-w-[34ch] leading-[1.7]">
+        <span className="label max-w-[34ch] leading-[1.7]" 
+        style={{flex:"1 1 50%", minWidth:"min-content", maxWidth:"fit-content"}}>
           Usamos estes dados apenas para cuidar da sua experiência no evento.
         </span>
       </div>
