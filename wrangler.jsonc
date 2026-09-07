@@ -1,0 +1,53 @@
+{
+  // Config do Worker (deploy via @opennextjs/cloudflare, comando "npx wrangler deploy").
+  // Sem esse arquivo, o build gerava essa config do zero a cada deploy — sem saber das
+  // variáveis, do binding do bucket R2 nem do ambiente do service binding, então
+  // "wrangler deploy" sincronizava o Worker remoto para bater com esse vazio local,
+  // apagando tudo isso a cada push na main. Valores abaixo conferidos no dashboard
+  // (Settings do Worker) em 2026-09-07 — se algo aqui não bater com o que está lá,
+  // ajuste este arquivo para refletir o remoto, não o contrário.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "convite-evento-cfo2026",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-09-03",
+  "compatibility_flags": ["global_fetch_strictly_public"],
+
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".open-next/assets"
+  },
+
+  "images": {
+    "binding": "IMAGES"
+  },
+
+  "r2_buckets": [
+    {
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "convite-evento-cfo2026-opennext-cache"
+    }
+  ],
+
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "convite-evento-cfo2026",
+      "environment": "production"
+    }
+  ],
+
+  // Só as variáveis em texto puro. As sensíveis (ADMIN_PASSWORD, R2_ACCESS_KEY_ID,
+  // R2_SECRET_ACCESS_KEY, R2_TOKEN_VALUE) são Secret no dashboard e NÃO entram aqui —
+  // "wrangler deploy" não mexe em secrets, só nesse bloco "vars".
+  "vars": {
+    "R2_BUCKET_NAME": "cfo-convites",
+    "R2_ENDPOINT": "https://23c9d75ae98cf060253cc59e2c7f067d.r2.cloudflarestorage.com",
+    "R2_PUBLIC_BASE_URL": "https://convitefiles.cfoinsights.com.br",
+    "R2_REGION": "auto",
+    "R2_TOKEN_NAME": "R2_CFO"
+  }
+
+  // O domínio customizado (convite.cfoinsights.com.br) foi deixado de fora de propósito:
+  // ele não é apagado pelos deploys atuais mesmo sem estar declarado aqui (confirmado),
+  // então declará-lo não é necessário para resolver o problema reportado.
+}
