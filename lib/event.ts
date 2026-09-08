@@ -45,10 +45,12 @@ export const INVITE_DEFAULTS = {
   concierge_whatsapp: "(11) 94234-3927",
 } as const;
 
-export const RELATIONSHIP_LOGOS: Record<RelationshipBrand, string> = {
+/** null = marca reconhecida mas sem logo ainda; UI cai para as iniciais. */
+export const RELATIONSHIP_LOGOS: Record<RelationshipBrand, string | null> = {
   Solutta: "/event/logos/relationship/solutta.svg",
   Auditto: "/event/logos/relationship/auditto.png",
   "Grupo Pomin": "/event/logos/relationship/grupo-pomin.png",
+  "Alerta Fiscal": null,
 };
 
 /** Números do evento. */
@@ -92,17 +94,20 @@ export const TRACKS = [
  */
 export const TIERS: Record<
   InviteTier,
-  { label: string; short: string; value: number; rank: number; benefits: VipBenefit[] , cupom: string}
+  { label: string; short: string; value: number; rank: number; benefits: VipBenefit[] , cupom: string, code?: number}
 > = {
   ARQUIBANCADA: {
+    code:115249,
     label: "Arquibancada Inferior",
     short: "Arquibancada",
     value: 497,
     rank: 1,
     cupom:"CONVITE-X5FWAMWP",
     benefits: [{ title: "Acesso à plenária" }, { title: "Acesso à feira de negócios" }],
+    
   },
   MESA: {
+    code:115246,
     label: "Mesa",
     short: "Mesa",
     value: 997,
@@ -117,6 +122,7 @@ export const TIERS: Record<
     ],
   },
   CAMAROTE: {
+    code:115248,
     label: "Camarote",
     short: "Camarote",
     value: 1897,

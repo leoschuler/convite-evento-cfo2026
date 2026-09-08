@@ -21,17 +21,26 @@ const phone_concierge = invitation.concierge_whatsapp?.trim() || "";
     : null;
 
 let link_checkout = new URL(`https://appticket.com.br/cfo-insights-26`);
+let link_hash = "";
 link_checkout.searchParams.set("utm_campaign", "convite-aceito");
 link_checkout.searchParams.set("utm_source", "site-convite");
 link_checkout.searchParams.set("utm_medium", "link");
 link_checkout.searchParams.set("cupom", TIERS[invitation.invite_tier].cupom);
-link_checkout.searchParams.set("nome", invitation.guest_name);
+if( TIERS[invitation.invite_tier].code ){
+link_checkout.searchParams.set("t", (TIERS[invitation.invite_tier].code?.toString()) + ":1");
+}
+
+link_hash += "nome=" + encodeURIComponent(invitation.guest_name) + "&";
 if( !!invitation.guest_whatsapp ) {
-  link_checkout.searchParams.set("tel", invitation.guest_whatsapp );
+  link_hash += "tel=" + encodeURIComponent(invitation.guest_whatsapp) + "&";
 }
 if( !!invitation.guest_email ) {
-  link_checkout.searchParams.set("email", invitation.guest_email);
+  link_hash += "email=" + encodeURIComponent(invitation.guest_email) + "&";
 }
+link_checkout.hash = link_hash;
+
+
+
 
   return (
     <section id="confirmation" className="scroll-mt-16">
@@ -74,7 +83,7 @@ if( !!invitation.guest_email ) {
           <p className="my-8 text-[1rem]" >
 
 <a
-              href={encodeURI(link_checkout.toString())}
+              href={link_checkout.toString().replace(/%3A/g, ":")}
               target="_blank"
               rel="noopener noreferrer"              
               className="group relative inline-flex overflow-hidden border border-line px-9 py-4 transition-colors duration-500 hover:border-bone/60"

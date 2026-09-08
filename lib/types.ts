@@ -3,7 +3,7 @@ export type InviteTier = "ARQUIBANCADA" | "MESA" | "CAMAROTE";
 
 export type InviteStatus = "AVAILABLE" | "ACCEPTED" | "EXPIRED" | "CANCELLED";
 
-export type RelationshipBrand = "Solutta" | "Auditto" | "Grupo Pomin";
+export type RelationshipBrand = "Solutta" | "Auditto" | "Grupo Pomin" | "Alerta Fiscal";
 
 /** Como nos referimos ao convidado e à empresa. Define artigos e concordância. */
 export type Gender = "M" | "F";
