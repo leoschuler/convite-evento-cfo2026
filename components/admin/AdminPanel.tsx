@@ -62,6 +62,8 @@ export default function AdminPanel({ initial }: { initial: Invitation[] }) {
   const [draft, setDraft] = useState<Invitation | null>(null);
   const [originalSlug, setOriginalSlug] = useState<string | undefined>();
   const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<InviteStatus | "">("");
+  const [tierFilter, setTierFilter] = useState<InviteTier | "">("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
@@ -70,11 +72,13 @@ export default function AdminPanel({ initial }: { initial: Invitation[] }) {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return invites;
-    return invites.filter((i) =>
-      [i.guest_name, i.company_name, i.invite_slug, i.guest_id].join(" ").toLowerCase().includes(q),
-    );
-  }, [invites, query]);
+    return invites.filter((i) => {
+      if (statusFilter && i.invite_status !== statusFilter) return false;
+      if (tierFilter && i.invite_tier !== tierFilter) return false;
+      if (!q) return true;
+      return [i.guest_name, i.company_name, i.invite_slug, i.guest_id].join(" ").toLowerCase().includes(q);
+    });
+  }, [invites, query, statusFilter, tierFilter]);
 
   const reload = async () => {
     const res = await fetch("/api/admin/invites");
@@ -144,6 +148,16 @@ ${inviteUrl(i.invite_slug)}`;
     setError(null);
   };
 
+  const exportFiltered = () => {
+    const blob = new Blob([JSON.stringify(filtered, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `convites-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const importBatch = async (items: unknown[]) => {
     const res = await fetch("/api/admin/invites/batch", {
       method: "POST",
@@ -178,6 +192,34 @@ ${inviteUrl(i.invite_slug)}`;
             placeholder="Buscar nome, empresa ou link"
             className="w-56 border-b border-edge bg-transparent pb-2 text-sm text-frost outline-none placeholder:text-dim focus:border-cyan"
           />
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as InviteStatus | "")}
+            className="border-b border-edge bg-transparent pb-2 text-sm text-frost outline-none focus:border-cyan"
+          >
+            <option value="" className="bg-slate text-frost">
+              Todos os status
+            </option>
+            {STATUSES.map((s) => (
+              <option key={s} value={s} className="bg-slate text-frost">
+                {s}
+              </option>
+            ))}
+          </select>
+          <select
+            value={tierFilter}
+            onChange={(e) => setTierFilter(e.target.value as InviteTier | "")}
+            className="border-b border-edge bg-transparent pb-2 text-sm text-frost outline-none focus:border-cyan"
+          >
+            <option value="" className="bg-slate text-frost">
+              Todas as categorias
+            </option>
+            {TIER_KEYS.map((t) => (
+              <option key={t} value={t} className="bg-slate text-frost">
+                {TIERS[t].label}
+              </option>
+            ))}
+          </select>
           <button
             onClick={startNew}
             className="border border-cyan/40 px-5 py-2.5 font-mono text-[0.6rem] uppercase tracking-[0.22em] text-frost transition-colors hover:border-cyan"
@@ -189,6 +231,13 @@ ${inviteUrl(i.invite_slug)}`;
             className="border border-edge px-5 py-2.5 font-mono text-[0.6rem] uppercase tracking-[0.22em] text-frost transition-colors hover:border-cyan"
           >
             Importar em lote
+          </button>
+          <button
+            onClick={exportFiltered}
+            disabled={!filtered.length}
+            className="border border-edge px-5 py-2.5 font-mono text-[0.6rem] uppercase tracking-[0.22em] text-frost transition-colors hover:border-cyan disabled:opacity-40"
+          >
+            Exportar
           </button>
           <button
             onClick={async () => {
@@ -206,6 +255,11 @@ ${inviteUrl(i.invite_slug)}`;
         <Stat label="Total" value={String(invites.length)} />
         <Stat label="Disponíveis" value={String(invites.filter((i) => i.invite_status === "AVAILABLE").length)} />
         <Stat label="Aceitos" value={String(invites.filter((i) => i.invite_status === "ACCEPTED").length)} />
+        <span className="label">
+          {filtered.length === invites.length
+            ? `${filtered.length} convite(s) listado(s)`
+            : `${filtered.length} de ${invites.length} convite(s) listado(s)`}
+        </span>
         {batchNotice && <span className="label text-cyan">{batchNotice}</span>}
       </div>
 
